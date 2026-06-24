@@ -3,198 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Telegram Shop</title>
+    <title>Premium Shop & Payment</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* কালার এবং ভেরিয়েবল */
         :root {
-            --primary-color: #2481cc;
-            --secondary-color: #f39c12;
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-color: #333;
-            --price-color: #27ae60;
+            --primary: #0088cc;
+            --bkash: #d12053;
+            --nagad: #f7941d;
+            --rocket: #8c3494;
+            --bg: #f8f9fa;
         }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .product-card { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
+        .product-card img { width: 100%; border-radius: 10px; height: 150px; object-fit: cover; }
+        .price { font-size: 20px; color: #27ae60; font-weight: bold; margin: 10px 0; }
+        .buy-btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-            color: var(--text-color);
-        }
-
-        /* হেডার ডিজাইন */
-        .header {
-            background: linear-gradient(135deg, #2481cc, #1a6fa5);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .header h1 { margin: 0; font-size: 24px; }
-        .header p { margin: 5px 0 0; font-size: 14px; opacity: 0.9; }
-
-        /* প্রোডাক্ট কন্টেইনার */
-        .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding: 20px;
-        }
-
-        /* প্রোডাক্ট কার্ড ডিজাইন */
-        .product-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-bottom: 15px;
-        }
-
-        .product-card:active {
-            transform: scale(0.95);
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-bottom: 1px solid #eee;
-        }
-
-        .product-card h3 {
-            font-size: 16px;
-            margin: 10px 5px 5px;
-            text-align: center;
-        }
-
-        .product-card .price {
-            color: var(--price-color);
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        /* বাটন ডিজাইন */
-        .buy-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 80%;
-            transition: 0.3s;
-        }
-
-        .buy-btn:hover {
-            background-color: #1a6fa5;
-        }
-
-        /* কার্ট ফ্লোটিং বাটন */
-        .cart-status {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 10px 30px;
-            border-radius: 30px;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-        }
+        /* Payment Modal */
+        #payment-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .method-card { padding: 15px; border-radius: 10px; margin-bottom: 10px; color: white; cursor: pointer; display: flex; justify-content: space-between; }
+        .bkash { background: var(--bkash); }
+        .nagad { background: var(--nagad); }
+        .rocket { background: var(--rocket); }
+        .input-group { margin-top: 20px; }
+        input { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .confirm-btn { background: #27ae60; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-top: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>📱 My Premium Shop</h1>
-    <p>সেরা পণ্য কিনুন সরাসরি টেলিগ্রামে</p>
-</div>
-
-<div class="container">
-    <!-- Product 1 -->
-    <div class="product-card">
-        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300" alt="Watch">
-        <h3>Smart Watch</h3>
-        <div class="price">$49.00</div>
-        <button class="buy-btn" onclick="addToCart('Smart Watch', 49)">অর্ডার করুন</button>
+    <div id="shop-page">
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400" alt="Product">
+            <h3>Premium Smart Watch</h3>
+            <div class="price">৳ ১৫০০</div>
+            <button class="buy-btn" onclick="openPayment('Smart Watch', 1500)">Buy Now</button>
+        </div>
     </div>
 
-    <!-- Product 2 -->
-    <div class="product-card">
-        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300" alt="Headphone">
-        <h3>Headphones</h3>
-        <div class="price">$25.00</div>
-        <button class="buy-btn" onclick="addToCart('Headphones', 25)">অর্ডার করুন</button>
+    <!-- Payment Gateway Section -->
+    <div id="payment-modal">
+        <h2 style="text-align:center">Checkout</h2>
+        <p>পেমেন্ট মেথড সিলেক্ট করুন:</p>
+        <div class="method-card bkash" onclick="selectMethod('bKash', '017XXXXXXXX')">bKash (Personal) <span>Select</span></div>
+        <div class="method-card nagad" onclick="selectMethod('Nagad', '018XXXXXXXX')">Nagad (Personal) <span>Select</span></div>
+        
+        <div id="payment-details" style="display:none; background: #eee; padding: 15px; border-radius: 10px; margin-top:15px;">
+            <p id="instruction"></p>
+            <div class="input-group">
+                <label>আপনার বিকাশ/নগদ নাম্বার:</label>
+                <input type="text" id="user-number" placeholder="01XXXXXXXXX">
+                <label style="margin-top:10px; display:block">ট্রানজেকশন আইডি (TrxID):</label>
+                <input type="text" id="trx-id" placeholder="8N7X6Z5W">
+            </div>
+            <button class="confirm-btn" onclick="submitOrder()">Submit Payment</button>
+        </div>
+        <button onclick="closePayment()" style="margin-top:20px; background:none; border:none; color:red; width:100%">Cancel</button>
     </div>
-
-    <!-- Product 3 -->
-    <div class="product-card">
-        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300" alt="Shoes">
-        <h3>Sneakers</h3>
-        <div class="price">$60.00</div>
-        <button class="buy-btn" onclick="addToCart('Sneakers', 60)">অর্ডার করুন</button>
-    </div>
-
-    <!-- Product 4 -->
-    <div class="product-card">
-        <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=300" alt="Camera">
-        <h3>Polaroid Camera</h3>
-        <div class="price">$85.00</div>
-        <button class="buy-btn" onclick="addToCart('Polaroid Camera', 85)">অর্ডার করুন</button>
-    </div>
-</div>
-
-<div id="cart-bar" class="cart-status">
-    অর্ডার প্রসেস হচ্ছে...
-</div>
 
 <script>
     let tg = window.Telegram.WebApp;
-    tg.expand(); // অ্যাপ ফুল স্ক্রিন হবে
-    tg.MainButton.text = "অর্ডার নিশ্চিত করুন";
-    tg.MainButton.textColor = "#FFFFFF";
-    tg.MainButton.color = "#27ae60";
+    tg.expand();
+    let currentOrder = {};
 
-    let cart = [];
-
-    function addToCart(name, price) {
-        cart.push({ name: name, price: price });
-        
-        // কার্টে আইটেম যোগ করলে টেলিগ্রামের মেইন বাটন দেখাবে
-        tg.MainButton.show();
-        
-        // সাময়িক নোটিফিকেশন
-        let bar = document.getElementById('cart-bar');
-        bar.style.display = 'block';
-        bar.innerText = name + " যোগ করা হয়েছে!";
-        setTimeout(() => { bar.style.display = 'none'; }, 2000);
+    function openPayment(name, price) {
+        currentOrder = { name, price };
+        document.getElementById('payment-modal').style.display = 'block';
+        document.getElementById('shop-page').style.display = 'none';
     }
 
-    // টেলিগ্রামের মেইন বাটনে ক্লিক করলে যা হবে
-    tg.onEvent('mainButtonClicked', function(){
-        if(cart.length > 0) {
-            let orderDetails = {
-                items: cart,
-                total: cart.reduce((sum, item) => sum + item.price, 0)
-            };
-            // বটের কাছে ডাটা পাঠিয়ে দিবে
-            tg.sendData(JSON.stringify(orderDetails));
-        }
-    });
-</script>
+    function closePayment() {
+        document.getElementById('payment-modal').style.display = 'none';
+        document.getElementById('shop-page').style.display = 'block';
+    }
 
+    function selectMethod(method, number) {
+        currentOrder.method = method;
+        document.getElementById('payment-details').style.display = 'block';
+        document.getElementById('instruction').innerHTML = `নিচের <b>${method}</b> নাম্বারে <b>৳${currentOrder.price}</b> সেন্ড মানি করুন। <br><br> নাম্বার: <b>${number}</b>`;
+    }
+
+    function submitOrder() {
+        const userNumber = document.getElementById('user-number').value;
+        const trxId = document.getElementById('trx-id').value;
+
+        if(!userNumber || !trxId) {
+            alert("সবগুলো তথ্য সঠিকভাবে দিন");
+            return;
+        }
+
+        const data = {
+            product: currentOrder.name,
+            price: currentOrder.price,
+            method: currentOrder.method,
+            sender: userNumber,
+            trxid: trxId
+        };
+
+        tg.sendData(JSON.stringify(data)); // বটের কাছে ডাটা পাঠানো
+        tg.close();
+    }
+</script>
 </body>
 </html>
